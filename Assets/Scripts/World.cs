@@ -3,18 +3,25 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Priority_Queue;
+using System.Collections;
+using UnityEngine.UI;
 
 public class World : MonoBehaviour {
 
     public static World instance;
 
+    public int attempts;
     public Tile startTile;
     public Tile goalTile;
     public int mapRadius = 16;
     public GameObject tilePrefab;
     public GameObject robotPrefab;
     public Dictionary<Vector2, Tile> map;
-
+    public Text PowerPercentage;
+    public GameObject barrierPrefab;
+    public GameObject concretePrefab;
+    public Material concreteDark;
+    public Material concreteLight;
     public Material walkable;
     public Material unknown;
     public Material blocked;
@@ -25,17 +32,49 @@ public class World : MonoBehaviour {
         Generate();
 	}
 
-	public bool ShowTile(Tile tile)
+    public void LightUpTile(Tile tile)
     {
-        if (tile.walkable)
+        if (!tile.revealed) {
+            tile.revealed = true;
+            UsePower();
+            if (tile == goalTile)
+            {
+                //GameWin();
+            }
+            else if (tile.walkable && !tile.blocked)
+            {
+                tile.SetColor(walkable);
+            }
+            else if (!tile.walkable && !tile.blocked)
+            {
+                Instantiate(barrierPrefab, tile.transform);
+                tile.SetColor(blocked);
+            }
+            else if (tile.blocked)
+            {
+                tile.GetComponentInChildren<ConcreteBlock>().ChangeMat(concreteLight);
+                tile.SetColor(walkable);
+            }
+        }
+    }
+
+	public void StepTile(Tile tile)
+    {
+        tile.revealed = true;
+        UsePower();
+        if (tile == goalTile)
+        {
+            GameWin();
+        }
+        else if (tile.walkable)
         {
             tile.SetColor(walkable);
-            return true;
         }
-        else
+        else if (!tile.walkable)
         {
+            Instantiate(barrierPrefab, tile.transform);
             tile.SetColor(blocked);
-            return false;
+            GameOver();
         }
     }
 
@@ -44,40 +83,44 @@ public class World : MonoBehaviour {
         //Placement
         map = new Dictionary<Vector2, Tile>();
         HexData hexData = new HexData(3f);
-
-        for (int q = -mapRadius; q <= mapRadius; q++)
+        
+        List<Tile> path = new List<Tile>();
+        while (path.Count == 0)
         {
-            int r1 = Mathf.Max(-mapRadius, -q - mapRadius);
-            int r2 = Mathf.Min(mapRadius, -q + mapRadius);
-            for (int r = r1; r <= r2; r++)
+            for (int q = -mapRadius; q <= mapRadius; q++)
             {
-                Vector3 realPos = new Vector3(
-                    r * hexData.Width() + q * (.5f * hexData.Width()),
-                    0,
-                    q * (hexData.Height() * .75f)
-                );
-                GameObject tileObj = Instantiate(tilePrefab, realPos, Quaternion.identity, transform);
-                tileObj.name = "Tile (" + q + ", " + r + ")";
-                tileObj.transform.localScale = tileObj.transform.localScale * hexData.Size();
-                Tile tile = tileObj.GetComponent<Tile>();
-                tile.coords = new Vector2(q, r);
-                map.Add(new Vector2(q, r), tile);
+                int r1 = Mathf.Max(-mapRadius, -q - mapRadius);
+                int r2 = Mathf.Min(mapRadius, -q + mapRadius);
+                for (int r = r1; r <= r2; r++)
+                {
+                    Vector3 realPos = new Vector3(
+                        r * hexData.Width() + q * (.5f * hexData.Width()),
+                        0,
+                        q * (hexData.Height() * .75f)
+                    );
+                    GameObject tileObj = Instantiate(tilePrefab, realPos, Quaternion.identity, transform);
+                    tileObj.name = "Tile (" + q + ", " + r + ")";
+                    tileObj.transform.localScale = tileObj.transform.localScale * hexData.Size();
+                    Tile tile = tileObj.GetComponent<Tile>();
+                    tile.coords = new Vector2(q, r);
+                    map.Add(new Vector2(q, r), tile);
 
-                tile.SetColor(unknown);
-                tile.walkable = true;
+                    tile.SetColor(unknown);
+                    tile.walkable = true;
+                }
             }
+
+            List<Tile> firsts = GenerateMaze();
+            startTile = firsts[0];
+            goalTile = firsts[1];
+
+            path = AStar(startTile, goalTile);
         }
 
-        List<Tile> path = new List<Tile>();
-        List<Tile> firsts = GenerateMaze();
-        startTile = firsts[0];
-        goalTile = firsts[1];
-        path = AStar(startTile, goalTile);
-        
-        GameObject robot = Instantiate(robotPrefab, startTile.transform.position, Quaternion.identity);
-        robot.name = "Robot";
-        robot.transform.Rotate(new Vector3(0, 30f, 0));
-        robot.GetComponent<PlayerController>().currentTile = startTile;
+        maxPower = (int)(path.Count + path.Count * .2f);
+        power = maxPower;
+        PowerPercentage.text = ((power / maxPower) * 100f).ToString() + "%";
+        PlaceRobot();
     }
 
     List<Tile> GenerateMaze()
@@ -100,43 +143,43 @@ public class World : MonoBehaviour {
         usedXs.Add(5000);
         usedYs.Add(5000);
 
+        int blockers = (int)Random.Range(mapRadius * 1.5f, mapRadius * 2f);
         //                      Amount of blockers
-        for (int i = 0; i < Random.Range(mapRadius, mapRadius * 1.5f); i++)
+        for (int i = 0; i < blockers; i++)
         {
             int x, y;
-            //int x = 5000, y = 5000;
-            //while (usedXs.Contains(x) || usedYs.Contains(y))
-            //{
-                x = Random.Range(-mapRadius + 2, mapRadius - 2);
+            x = Random.Range(-mapRadius + 2, mapRadius - 2);
 
-                int yBegin = 0;
-                int yEnd = 0;
-                if (x <= 0)
-                {
-                    yBegin = (-(mapRadius + x));
-                    yEnd = mapRadius;
-                }
-                else
-                {
-                    yBegin = -mapRadius;
-                    yEnd = mapRadius - x;
-                }
-                y = Random.Range(yBegin, yEnd);
-            //}
+            int yBegin = 0;
+            int yEnd = 0;
+            if (x <= 0)
+            {
+                yBegin = (-(mapRadius + x));
+                yEnd = mapRadius;
+            }
+            else
+            {
+                yBegin = -mapRadius;
+                yEnd = mapRadius - x;
+            }
+            y = Random.Range(yBegin, yEnd);
             usedXs.Add(x);
             usedYs.Add(y);
-            //map[new Vector2(x, y)].SetColor(blocked);
 
+            int whichBlocker = Random.Range(0, 3);
             int width = Random.Range(2, 5);
             int start = y - width / 2;
-            //Debug.Log(width + " start at " + start);
             for (int f = start; f < start + width; f++)
             {
                 if (map.ContainsKey(new Vector2(x, f)))
                 {
-                    //map[new Vector2(x, f)].SetColor(blocked);
                     blockedTiles.Add(map[new Vector2(x, f)]);
                     map[new Vector2(x, f)].walkable = false;
+                    if (whichBlocker == 1)
+                    {
+                        map[new Vector2(x, f)].blocked = true;
+                        Instantiate(concretePrefab, map[new Vector2(x, f)].transform);
+                    }
                 }
             }
         }
@@ -278,9 +321,77 @@ public class World : MonoBehaviour {
         return Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y), Mathf.Abs((-a.x - a.y) - (- b.x - b.y)));
     }
 
+    void PlaceRobot()
+    {
+        if (GameObject.FindGameObjectWithTag("Player") != null)
+            Destroy(GameObject.FindGameObjectWithTag("Player"));
+
+        GameObject robot = Instantiate(robotPrefab, startTile.transform.position, Quaternion.identity);
+        robot.name = "Robot";
+        robot.transform.Rotate(new Vector3(0, 30f, 0));
+        robot.GetComponent<PlayerController>().currentTile = startTile;
+        attempts += 1;
+        Camera.main.GetComponentInParent<CameraFollower>().target = robot.transform;
+    }
+
     void SetWalkable(Tile tile)
     {
         tile.walkable = true;
         tile.SetColor(walkable);
+    }
+
+    private int maxPower;
+    private int power;
+    public int UsePower()
+    {
+        power -= 1;
+        if (power <= 0)
+            GameOver();
+        else
+        {
+            PowerPercentage.text = ((int)((float)(((float)power / (float)maxPower) * 100f))).ToString() + "%";
+        }
+        return power;
+    }
+
+    public bool dying;
+    public void GameOver()
+    {
+        dying = true;
+        StartCoroutine(NewRobot());
+        
+    }
+    IEnumerator NewRobot()
+    {
+        yield return new WaitForSeconds(.8f);
+        GetComponent<ScreenFade>().BeginFade(1);
+        yield return new WaitForSeconds(.5f);
+        PlaceRobot();
+        power = maxPower;
+        
+        yield return new WaitForSeconds(.5f);
+        PowerPercentage.text = ((power / maxPower) * 100f).ToString() + "%";
+        foreach (Tile tile in map.Values)
+        {
+            tile.SetColor(unknown);
+        }
+        startTile.SetColor(startend);
+        goalTile.SetColor(startend);
+
+        GameObject[] respawners = GameObject.FindGameObjectsWithTag("Respawn");
+        foreach (GameObject obj in respawners)
+        {
+            Destroy(obj);
+        }
+
+        yield return new WaitForSeconds(GetComponent<ScreenFade>().BeginFade(-1));
+        dying = false;
+    }
+
+    public void GameWin()
+    {
+        Debug.LogError("YOU WON! :D");
+        GetComponent<ScreenFade>().BeginFade(1);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 }

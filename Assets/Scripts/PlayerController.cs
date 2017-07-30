@@ -18,21 +18,29 @@ public class PlayerController : MonoBehaviour {
     bool rotatingRight;
     bool rotatingLeft;
     float startRot;
+    public float rotSpeed = 2f;
     public float moveSpeed = 5f;
 
 	void Update () {
-        if (Input.GetKey(KeyCode.W) && !moving && !rotatingLeft && !rotatingRight)
+        if (Input.GetAxis("Vertical") > .2f && !moving && !rotatingLeft && !rotatingRight && !World.instance.dying)
         {
             int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
             Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
             if (neighbours.ContainsKey(index)) {
-                targetTile = neighbours[index];
-                moving = true;
-                animations.StartMove(true);
+                if (!neighbours[index].blocked)
+                {
+                    targetTile = neighbours[index];
+                    moving = true;
+                    animations.StartMove(true);
+                }
+                else
+                {
+                    World.instance.LightUpTile(neighbours[index]);
+                }
             }
         }
-        
-        if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.A))
+        //Debug.Log(Input.GetAxis("Horizontal"));
+        if (Input.GetAxis("Horizontal") <= -.2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
         {
             if (!rotatingLeft && !rotatingRight && !moving)
             {
@@ -47,7 +55,7 @@ public class PlayerController : MonoBehaviour {
                 animations.StartRotate(false);
             }
         }
-        else if (Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.D) && !rotatingLeft && !rotatingRight && !moving)
+        else if (Input.GetAxis("Horizontal") >= .2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
         {
             if (!rotatingLeft && !rotatingRight && !moving)
             {
@@ -59,9 +67,18 @@ public class PlayerController : MonoBehaviour {
                 {
                     startRot -= 360f;
                 }
-                Debug.Log(startRot + " to " + (startRot + 60f) + "\n" + transform.rotation.eulerAngles.y);
 
                 animations.StartRotate(true);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Space) && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
+        {
+            int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
+            Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
+            if (neighbours.ContainsKey(index))
+            {
+                Tile target = neighbours[index];
+                World.instance.LightUpTile(target);
             }
         }
 
@@ -75,15 +92,7 @@ public class PlayerController : MonoBehaviour {
                 animations.Stop();
                 moving = false;
 
-                //false = dead
-                if (World.instance.ShowTile(currentTile))
-                {
-
-                }
-                else
-                {
-                    Debug.LogError("Game over");
-                }
+                World.instance.StepTile(currentTile);
             }
         }
 
@@ -122,11 +131,5 @@ public class PlayerController : MonoBehaviour {
                 animations.Stop();
             }
         }
-    }
-
-    public float rotSpeed = 2f;
-    private void LateUpdate()
-    {
-        
     }
 }

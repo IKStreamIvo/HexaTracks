@@ -5,7 +5,8 @@ public class Tile : MonoBehaviour
 {
     public Vector2 coords;
     public bool walkable = true;
-
+    public bool revealed;
+    public bool blocked;
     private MaterialPropertyBlock _propBlock;
     private Renderer _renderer;
 
@@ -24,7 +25,6 @@ public class Tile : MonoBehaviour
 
     public void SetColor(Material mat)
     {
-        Debug.Log("change");
         Material[] mats = GetComponent<MeshRenderer>().materials;
         mats[1] = mat;
         GetComponent<MeshRenderer>().materials = mats;

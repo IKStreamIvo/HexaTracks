@@ -1,37 +1,17 @@
 fileFormatVersion: 2
-guid: 492d78f532ef3584084f427971810e1a
-timeCreated: 1501344586
+guid: d71a4fb677f399e48a243f2d5cdb1550
+timeCreated: 1501405902
 licenseType: Free
 ModelImporter:
   serializedVersion: 21
   fileIDToRecycleName:
-    100000: Body
-    100002: //RootNode
-    100004: Track_L
-    100006: Track_R
-    100008: Trackpath
-    100010: Vert
-    400000: Body
-    400002: //RootNode
-    400004: Track_L
-    400006: Track_R
-    400008: Trackpath
-    400010: Vert
-    2300000: Body
-    2300002: Trackpath
-    2300004: Vert
-    3300000: Body
-    3300002: Trackpath
-    3300004: Vert
-    4300000: Vert
-    4300002: Trackpath
-    4300004: Track_R
-    4300006: Track_L
-    4300008: Body
+    100000: //RootNode
+    400000: //RootNode
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: Plane
     7400000: Default Take
     9500000: //RootNode
-    13700000: Track_L
-    13700002: Track_R
   materials:
     importMaterials: 1
     materialName: 0
@@ -82,7 +62,7 @@ ModelImporter:
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2

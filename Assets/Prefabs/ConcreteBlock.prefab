@@ -37,7 +37,8 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4092698694679786}
-  - component: {fileID: 114121133459754472}
+  - component: {fileID: 114659427276398202}
+  - component: {fileID: 114011223241571688}
   m_Layer: 0
   m_Name: ConcreteBlock
   m_TagString: Untagged
@@ -128,7 +129,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &114121133459754472
+--- !u!114 &114011223241571688
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -137,5 +138,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a247918d8a11c4247b2b134f94ccb632, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114659427276398202
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1216741696599970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25f49228f2e6b3945a2963dd5becd87e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

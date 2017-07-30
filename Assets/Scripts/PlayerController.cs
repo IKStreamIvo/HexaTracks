@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour {
             if (neighbours.ContainsKey(index)) {
                 if (!neighbours[index].blocked)
                 {
+                    AudioPlayer.instance.RobotMove();
                     targetTile = neighbours[index];
                     moving = true;
                     animations.StartMove(true);
@@ -44,6 +45,7 @@ public class PlayerController : MonoBehaviour {
         {
             if (!rotatingLeft && !rotatingRight && !moving)
             {
+                AudioPlayer.instance.RobotTurn();
                 //LEFT
                 rotatingLeft = true;
                 rotatingRight = false;
@@ -59,6 +61,7 @@ public class PlayerController : MonoBehaviour {
         {
             if (!rotatingLeft && !rotatingRight && !moving)
             {
+                AudioPlayer.instance.RobotTurn();
                 //RIGHT
                 rotatingLeft = false;
                 rotatingRight = true;

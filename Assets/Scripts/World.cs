@@ -74,6 +74,7 @@ public class World : MonoBehaviour {
         {
             Instantiate(barrierPrefab, tile.transform);
             tile.SetColor(blocked);
+            AudioPlayer.instance.Forcefield();
             GameOver();
         }
     }
@@ -346,7 +347,10 @@ public class World : MonoBehaviour {
     {
         power -= 1;
         if (power <= 0)
+        {
+            AudioPlayer.instance.BatteryDeath();
             GameOver();
+        }
         else
         {
             PowerPercentage.text = ((int)((float)(((float)power / (float)maxPower) * 100f))).ToString() + "%";
@@ -390,6 +394,7 @@ public class World : MonoBehaviour {
 
     public void GameWin()
     {
+        AudioPlayer.instance.Finish();
         Debug.LogError("YOU WON! :D");
         GetComponent<ScreenFade>().BeginFade(1);
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);

@@ -22,3 +22,6 @@ Forcefield and battery death sound: http://soundimage.org
 
 ### Extra
 Mouse icon on main menu: http://www.iconsmind.com/
+
+### Download this on itch.io! 
+https://ikstreamivo.itch.io/hexatracks

@@ -22,69 +22,72 @@ public class PlayerController : MonoBehaviour {
     public float moveSpeed = 5f;
 
 	void Update () {
-        if (Input.GetAxis("Vertical") > .2f && !moving && !rotatingLeft && !rotatingRight && !World.instance.dying)
+        if (!World.instance.UIOpen)
         {
-            int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
-            Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
-            if (neighbours.ContainsKey(index)) {
-                if (!neighbours[index].blocked)
+            if (Input.GetAxis("Vertical") > .2f && !moving && !rotatingLeft && !rotatingRight && !World.instance.dying)
+            {
+                int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
+                Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
+                if (neighbours.ContainsKey(index))
                 {
-                    AudioPlayer.instance.RobotMove();
-                    targetTile = neighbours[index];
-                    moving = true;
-                    animations.StartMove(true);
-                }
-                else
-                {
-                    World.instance.LightUpTile(neighbours[index]);
+                    if (!neighbours[index].blocked)
+                    {
+                        AudioPlayer.instance.RobotMove();
+                        targetTile = neighbours[index];
+                        moving = true;
+                        animations.StartMove(true);
+                    }
+                    else
+                    {
+                        World.instance.LightUpTile(neighbours[index]);
+                    }
                 }
             }
-        }
-        //Debug.Log(Input.GetAxis("Horizontal"));
-        if (Input.GetAxis("Horizontal") <= -.2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
-        {
-            if (!rotatingLeft && !rotatingRight && !moving)
+            //Debug.Log(Input.GetAxis("Horizontal"));
+            if (Input.GetAxis("Horizontal") <= -.2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
             {
-                AudioPlayer.instance.RobotTurn();
-                //LEFT
-                rotatingLeft = true;
-                rotatingRight = false;
-                startRot = transform.rotation.eulerAngles.y;
-                if (startRot - 60f <= 0f)
+                if (!rotatingLeft && !rotatingRight && !moving)
                 {
-                    startRot += 360f;
+                    AudioPlayer.instance.RobotTurn();
+                    //LEFT
+                    rotatingLeft = true;
+                    rotatingRight = false;
+                    startRot = transform.rotation.eulerAngles.y;
+                    if (startRot - 60f <= 0f)
+                    {
+                        startRot += 360f;
+                    }
+                    animations.StartRotate(false);
                 }
-                animations.StartRotate(false);
             }
-        }
-        else if (Input.GetAxis("Horizontal") >= .2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
-        {
-            if (!rotatingLeft && !rotatingRight && !moving)
+            else if (Input.GetAxis("Horizontal") >= .2f && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
             {
-                AudioPlayer.instance.RobotTurn();
-                //RIGHT
-                rotatingLeft = false;
-                rotatingRight = true;
-                startRot = transform.rotation.eulerAngles.y;
-                if (startRot + 60f > 360f)
+                if (!rotatingLeft && !rotatingRight && !moving)
                 {
-                    startRot -= 360f;
-                }
+                    AudioPlayer.instance.RobotTurn();
+                    //RIGHT
+                    rotatingLeft = false;
+                    rotatingRight = true;
+                    startRot = transform.rotation.eulerAngles.y;
+                    if (startRot + 60f > 360f)
+                    {
+                        startRot -= 360f;
+                    }
 
-                animations.StartRotate(true);
+                    animations.StartRotate(true);
+                }
             }
-        }
-        else if (Input.GetKeyDown(KeyCode.Space) && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
-        {
-            int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
-            Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
-            if (neighbours.ContainsKey(index))
+            else if (Input.GetKeyDown(KeyCode.Space) && !rotatingLeft && !rotatingRight && !moving && !World.instance.dying)
             {
-                Tile target = neighbours[index];
-                World.instance.LightUpTile(target);
+                int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
+                Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
+                if (neighbours.ContainsKey(index))
+                {
+                    Tile target = neighbours[index];
+                    World.instance.LightUpTile(target);
+                }
             }
         }
-
         if (moving)
         {
             transform.position = Vector3.MoveTowards(transform.position, targetTile.transform.position, moveSpeed * Time.deltaTime);

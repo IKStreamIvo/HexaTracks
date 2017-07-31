@@ -10,6 +10,7 @@ public class World : MonoBehaviour {
 
     public static World instance;
 
+    public bool UIOpen;
     public int attempts;
     public Tile startTile;
     public Tile goalTile;
@@ -82,12 +83,12 @@ public class World : MonoBehaviour {
     void Generate()
     {
         //Placement
-        map = new Dictionary<Vector2, Tile>();
         HexData hexData = new HexData(3f);
         
         List<Tile> path = new List<Tile>();
         while (path.Count == 0)
         {
+            map = new Dictionary<Vector2, Tile>();
             for (int q = -mapRadius; q <= mapRadius; q++)
             {
                 int r1 = Mathf.Max(-mapRadius, -q - mapRadius);
@@ -144,7 +145,7 @@ public class World : MonoBehaviour {
         usedXs.Add(5000);
         usedYs.Add(5000);
 
-        int blockers = (int)Random.Range(mapRadius * 1.5f, mapRadius * 2f);
+        int blockers = (int)Random.Range(mapRadius, mapRadius * 1.5f);
         //                      Amount of blockers
         for (int i = 0; i < blockers; i++)
         {
@@ -327,7 +328,7 @@ public class World : MonoBehaviour {
         if (GameObject.FindGameObjectWithTag("Player") != null)
             Destroy(GameObject.FindGameObjectWithTag("Player"));
 
-        GameObject robot = Instantiate(robotPrefab, startTile.transform.position, Quaternion.identity);
+        GameObject robot = Instantiate(robotPrefab, startTile.transform.position, Quaternion.identity, transform);
         robot.name = "Robot";
         robot.transform.Rotate(new Vector3(0, 30f, 0));
         robot.GetComponent<PlayerController>().currentTile = startTile;
@@ -348,6 +349,7 @@ public class World : MonoBehaviour {
         power -= 1;
         if (power <= 0)
         {
+            PowerPercentage.text = "0%";
             AudioPlayer.instance.BatteryDeath();
             GameOver();
         }
@@ -392,11 +394,16 @@ public class World : MonoBehaviour {
         dying = false;
     }
 
+    public GameObject winCanvas;
     public void GameWin()
     {
         AudioPlayer.instance.Finish();
-        Debug.LogError("YOU WON! :D");
+        //Debug.LogError("YOU WON! :D");
         GetComponent<ScreenFade>().BeginFade(1);
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        GameObject canvas = Instantiate(winCanvas);
+        canvas.GetComponent<WinCanvas>().Attempts(attempts);
+        GetComponent<ScreenFade>().BeginFade(-1);
+        Destroy(gameObject);
+        //UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 }

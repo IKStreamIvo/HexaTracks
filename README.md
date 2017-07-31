@@ -16,7 +16,9 @@ IKStreamIvo
 
 ###Audio files:
 Music: http://soundimage.org
-Robot sounds, extracted from this file https://freesound.org/people/OwlStorm/sounds/209017/
+Robot turn sound, extracted from: https://freesound.org/people/OwlStorm/sounds/209017/
+Robot move sound, extracted from: https://freesound.org/people/LG/sounds/18726/ 
+Forcefield and battery death sound: http://soundimage.org 
 
 ###Extra
 Mouse icon on main menu: http://www.iconsmind.com/

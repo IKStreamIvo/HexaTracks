@@ -81,6 +81,7 @@ public class PlayerController : MonoBehaviour {
             {
                 int index = (int)((transform.rotation.eulerAngles.y - 30f) * (0 - 5) / (30f - 330f) + 0);
                 Dictionary<int, Tile> neighbours = World.instance.TileNeighboursDict(currentTile);
+                Debug.Log("Beep" + neighbours.ContainsKey(index));
                 if (neighbours.ContainsKey(index))
                 {
                     Tile target = neighbours[index];

@@ -35,6 +35,7 @@ public class World : MonoBehaviour {
 
     public void LightUpTile(Tile tile)
     {
+        Debug.Log(tile + tile.revealed.ToString() + tile.walkable.ToString() + tile.blocked.ToString());
         if (!tile.revealed) {
             tile.revealed = true;
             UsePower();
@@ -56,6 +57,14 @@ public class World : MonoBehaviour {
                 tile.GetComponentInChildren<ConcreteBlock>().ChangeMat(concreteLight);
                 tile.SetColor(walkable);
             }
+            else
+            {
+                tile.SetColor(walkable);
+            }
+        }
+        else
+        {
+            tile.SetColor(walkable);
         }
     }
 
